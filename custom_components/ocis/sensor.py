@@ -21,6 +21,16 @@ from .coordinator import OcisCoordinator, OcisData
 from .entity import OcisDriveEntity, OcisEntity
 
 
+def _gb(value_bytes: Any) -> float | None:
+    """Present bytes as GB (2 decimals) — raw bytes stay in coordinator data."""
+    if value_bytes is None or isinstance(value_bytes, bool):
+        return None
+    try:
+        return round(float(value_bytes) / 1024**3, 2)
+    except (TypeError, ValueError):
+        return None
+
+
 @dataclass(frozen=True, kw_only=True)
 class OcisSensorDescription(SensorEntityDescription):
     value_fn: Callable[[OcisData], Any]
@@ -77,24 +87,27 @@ GLOBAL_DESCRIPTIONS: tuple[OcisSensorDescription, ...] = (
         translation_key="storage_used",
         device_class=SensorDeviceClass.DATA_SIZE,
         state_class=SensorStateClass.TOTAL,
-        native_unit_of_measurement=UnitOfInformation.BYTES,
-        value_fn=lambda d: d.get("storage_used"),
+        native_unit_of_measurement=UnitOfInformation.GIGABYTES,
+        suggested_display_precision=2,
+        value_fn=lambda d: _gb(d.get("storage_used")),
     ),
     OcisSensorDescription(
         key="storage_total",
         translation_key="storage_total",
         device_class=SensorDeviceClass.DATA_SIZE,
         state_class=SensorStateClass.TOTAL,
-        native_unit_of_measurement=UnitOfInformation.BYTES,
-        value_fn=lambda d: d.get("storage_total"),
+        native_unit_of_measurement=UnitOfInformation.GIGABYTES,
+        suggested_display_precision=2,
+        value_fn=lambda d: _gb(d.get("storage_total")),
     ),
     OcisSensorDescription(
         key="storage_free",
         translation_key="storage_free",
         device_class=SensorDeviceClass.DATA_SIZE,
         state_class=SensorStateClass.TOTAL,
-        native_unit_of_measurement=UnitOfInformation.BYTES,
-        value_fn=lambda d: d.get("storage_free"),
+        native_unit_of_measurement=UnitOfInformation.GIGABYTES,
+        suggested_display_precision=2,
+        value_fn=lambda d: _gb(d.get("storage_free")),
     ),
     OcisSensorDescription(
         key="storage_usage_percent",
@@ -113,16 +126,18 @@ DRIVE_DESCRIPTIONS: tuple[OcisDriveSensorDescription, ...] = (
         translation_key="drive_used",
         device_class=SensorDeviceClass.DATA_SIZE,
         state_class=SensorStateClass.TOTAL,
-        native_unit_of_measurement=UnitOfInformation.BYTES,
-        value_fn=lambda d: d.get("used"),
+        native_unit_of_measurement=UnitOfInformation.GIGABYTES,
+        suggested_display_precision=2,
+        value_fn=lambda d: _gb(d.get("used")),
     ),
     OcisDriveSensorDescription(
         key="total",
         translation_key="drive_total",
         device_class=SensorDeviceClass.DATA_SIZE,
         state_class=SensorStateClass.TOTAL,
-        native_unit_of_measurement=UnitOfInformation.BYTES,
-        value_fn=lambda d: d.get("total"),
+        native_unit_of_measurement=UnitOfInformation.GIGABYTES,
+        suggested_display_precision=2,
+        value_fn=lambda d: _gb(d.get("total")),
     ),
     OcisDriveSensorDescription(
         key="usage_percent",
@@ -137,9 +152,10 @@ DRIVE_DESCRIPTIONS: tuple[OcisDriveSensorDescription, ...] = (
         translation_key="drive_free",
         device_class=SensorDeviceClass.DATA_SIZE,
         state_class=SensorStateClass.TOTAL,
-        native_unit_of_measurement=UnitOfInformation.BYTES,
+        native_unit_of_measurement=UnitOfInformation.GIGABYTES,
+        suggested_display_precision=2,
         entity_registry_enabled_default=False,
-        value_fn=lambda d: d.get("free"),
+        value_fn=lambda d: _gb(d.get("free")),
     ),
     OcisDriveSensorDescription(
         key="quota_state",
