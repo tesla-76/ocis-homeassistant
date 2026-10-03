@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any, TypedDict
 
 from homeassistant.config_entries import ConfigEntry
@@ -47,10 +47,9 @@ class OcisData(TypedDict):
     groups_total: int | None
     drives_total: int
     drives: dict[str, DriveData]
-    storage_total: int | None
     storage_used: int
-    storage_free: int | None
-    storage_usage_percent: float | None
+    storage_state: str | None
+    storage_last_modified: datetime | None
     version: str | None
     edition: str | None
 
@@ -72,13 +71,10 @@ def summarize_users(users: list[dict[str, Any]]) -> tuple[int, int, int]:
 
 def summarize_drives(
     drives: list[dict[str, Any]],
-) -> tuple[dict[str, DriveData], int | None, int, int | None, float | None]:
-    """Build per-drive map + storage totals. Missing quota.total (OCIS #4328) -> None."""
+) -> tuple[dict[str, DriveData], int]:
+    """Per-drive quota map + total used bytes (virtual drives excluded)."""
     parsed: dict[str, DriveData] = {}
-    total = 0
     used = 0
-    complete = True  # False when any real (non-virtual) drive lacks a quota total
-    counted = 0
     for d in drives:
         drive_id = str(d.get("id", ""))
         if not drive_id:
@@ -116,21 +112,36 @@ def summarize_drives(
         )
         if drive_type == "virtual":
             continue  # Shares/Jail mounts: no real storage, keep out of totals
-        counted += 1
         used += q_used
-        if q_total is not None:
-            total += q_total
-        else:
-            complete = False
-    # Totals are only meaningful when every real drive has a limited quota;
-    # otherwise report used bytes and leave total/percent unknown (honest).
-    storage_total = total if (counted and complete) else None
-    storage_free: int | None = None
-    storage_pct: float | None = None
-    if storage_total:
-        storage_free = max(storage_total - used, 0)
-        storage_pct = round(used / storage_total * 100, 1)
-    return parsed, storage_total, used, storage_free, storage_pct
+    return parsed, used
+
+
+_STATE_SEVERITY = {"normal": 1, "nearing": 2, "critical": 3, "exceeded": 4}
+
+
+def summarize_global_state(
+    drives: list[dict[str, Any]],
+) -> tuple[str | None, datetime | None]:
+    """Worst quota state across real drives + latest modification time."""
+    worst: str | None = None
+    worst_rank = 0
+    latest: datetime | None = None
+    for d in drives:
+        if str(d.get("driveType") or "unknown") == "virtual":
+            continue
+        state = (d.get("quota") or {}).get("state")
+        if isinstance(state, str) and _STATE_SEVERITY.get(state, 0) > worst_rank:
+            worst_rank = _STATE_SEVERITY[state]
+            worst = state
+        raw_ts = d.get("lastModifiedDateTime")
+        if isinstance(raw_ts, str):
+            try:
+                ts = datetime.fromisoformat(raw_ts.replace("Z", "+00:00"))
+            except ValueError:
+                continue
+            if latest is None or ts > latest:
+                latest = ts
+    return worst, latest
 
 
 class OcisCoordinator(DataUpdateCoordinator[OcisData]):
@@ -173,7 +184,8 @@ class OcisCoordinator(DataUpdateCoordinator[OcisData]):
         users = bundle.get("users", [])
         drives = bundle.get("drives", [])
         users_total, active, disabled = summarize_users(users)
-        parsed, s_total, s_used, s_free, s_pct = summarize_drives(drives)
+        parsed, s_used = summarize_drives(drives)
+        state, last_modified = summarize_global_state(drives)
 
         version = status.get("productversion") or status.get("version")
         return OcisData(
@@ -184,10 +196,9 @@ class OcisCoordinator(DataUpdateCoordinator[OcisData]):
             groups_total=bundle.get("groups_total"),
             drives_total=len(parsed),
             drives=parsed,
-            storage_total=s_total,
             storage_used=s_used,
-            storage_free=s_free,
-            storage_usage_percent=s_pct,
+            storage_state=state,
+            storage_last_modified=last_modified,
             version=str(version) if version else None,
             edition=status.get("edition"),
         )

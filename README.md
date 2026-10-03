@@ -28,7 +28,7 @@ Alternative considered and rejected: OIDC password grant (fragile behind reverse
 
 Server device `OCIS <host>` + one device per Space/drive.
 
-Globals: version, edition, users total/active/disabled, groups total (may be unavailable if forbidden), spaces total, storage used/total/free/usage %, binary `online`.
+Globals: version, edition, users total/active/disabled, groups total (may be unavailable if forbidden), spaces total, storage used (GB), worst quota state across Spaces, latest Space activity. Binary `online`.
 
 Per-drive (enabled by default): used, total, usage %. Disabled by default: free, quota state. Extra attributes: drive name/type/owner.
 
@@ -36,9 +36,10 @@ Per-drive (enabled by default): used, total, usage %. Disabled by default: free,
 
 - Drives listed are those visible to the token user; an admin token sees all.
 - `quota.total = 0` means unlimited in OCIS (with `remaining` = max-int64): per-drive total/usage correctly show `unknown`.
-- Global storage total/free/usage are reported only when every real Space has a limited quota; with unlimited Spaces you still get global used bytes plus full per-drive sensors. Virtual drives (Shares) are excluded from totals.
+- Global storage used counts real Spaces only; virtual drives (Shares) are excluded.
 - Groups count is best-effort; polling still succeeds if forbidden.
-- Storage totals are sums of returned Spaces, not host disk.
+- Storage totals are sums of returned Spaces, not host disk. For real host-disk
+  free space, monitor the OCIS machine itself (e.g. SNMP on the LXC).
 
 ## Tests
 

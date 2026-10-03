@@ -36,10 +36,13 @@ async def async_get_config_entry_diagnostics(
         "users_disabled": data.get("users_disabled"),
         "groups_total": data.get("groups_total"),
         "drives_total": data.get("drives_total"),
-        "storage_total": data.get("storage_total"),
         "storage_used": data.get("storage_used"),
-        "storage_free": data.get("storage_free"),
-        "storage_usage_percent": data.get("storage_usage_percent"),
+        "storage_state": data.get("storage_state"),
+        "storage_last_modified": (
+            data["storage_last_modified"].isoformat()
+            if data.get("storage_last_modified")
+            else None
+        ),
         "version": data.get("version"),
         "edition": data.get("edition"),
         "drive_ids": sorted((data.get("drives") or {}).keys()),
