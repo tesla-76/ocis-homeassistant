@@ -2,12 +2,12 @@
   "domain": "ocis",
   "name": "ownCloud Infinite Scale",
   "version": "0.1.0",
-  "codeowners": ["@loren"],
+  "codeowners": ["@tesla-76"],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/loren/ocis-homeassistant",
+  "documentation": "https://github.com/tesla-76/ocis-homeassistant",
   "integration_type": "hub",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/loren/ocis-homeassistant/issues",
+  "issue_tracker": "https://github.com/tesla-76/ocis-homeassistant/issues",
   "requirements": []
 }
