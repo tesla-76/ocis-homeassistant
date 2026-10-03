@@ -1,0 +1,76 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connetti a ownCloud Infinite Scale",
+        "description": "Inserisci l'URL pubblico e un app token creato con `ocis auth-app create`.",
+        "data": {
+          "base_url": "URL base",
+          "username": "Nome utente",
+          "app_token": "App token",
+          "verify_ssl": "Verifica certificato SSL"
+        },
+        "data_description": {
+          "base_url": "URL pubblico tramite reverse proxy, es. https://ocis.example.com",
+          "username": "Utente admin per cui è stato creato il token",
+          "app_token": "Token di lunga durata da `ocis auth-app create --user-name=admin`",
+          "verify_ssl": "Disattiva per i certificati self-signed"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Riautentica OCIS",
+        "description": "L'app token è stato rifiutato. Creane uno nuovo e incollalo qui.",
+        "data": {
+          "app_token": "Nuovo app token",
+          "verify_ssl": "Verifica certificato SSL"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Impossibile raggiungere OCIS. Controlla URL, reverse proxy e flag SSL.",
+      "invalid_auth": "Autenticazione fallita. Controlla nome utente e app token.",
+      "unknown": "Errore imprevisto. Controlla i log."
+    },
+    "abort": {
+      "already_configured": "Questo server OCIS è già configurato.",
+      "wrong_account": "Questo token appartiene a un altro server/utente."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Impostazioni OCIS",
+        "description": "Polling leggero: 4 piccole chiamate HTTP per ciclo.",
+        "data": {
+          "scan_interval": "Intervallo di aggiornamento (minuti)"
+        },
+        "data_description": {
+          "scan_interval": "Ogni quanto interrogare OCIS (1-60 minuti, default 15)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "version": { "name": "Versione" },
+      "edition": { "name": "Edizione" },
+      "users_total": { "name": "Utenti totali" },
+      "users_active": { "name": "Utenti attivi" },
+      "users_disabled": { "name": "Utenti disabilitati" },
+      "groups_total": { "name": "Gruppi totali" },
+      "drives_total": { "name": "Spazi totali" },
+      "storage_used": { "name": "Spazio usato" },
+      "storage_total": { "name": "Spazio totale" },
+      "storage_free": { "name": "Spazio libero" },
+      "storage_usage_percent": { "name": "Utilizzo spazio" },
+      "drive_used": { "name": "Usato" },
+      "drive_total": { "name": "Totale" },
+      "drive_usage_percent": { "name": "Utilizzo" },
+      "drive_free": { "name": "Libero" },
+      "drive_quota_state": { "name": "Stato quota" }
+    },
+    "binary_sensor": {
+      "server_online": { "name": "In linea" }
+    }
+  }
+}
