@@ -1,0 +1,25 @@
+{
+  "entity": {
+    "sensor": {
+      "version": { "name": "Version" },
+      "edition": { "name": "Edition" },
+      "users_total": { "name": "Users total" },
+      "users_active": { "name": "Users active" },
+      "users_disabled": { "name": "Users disabled" },
+      "groups_total": { "name": "Groups total" },
+      "drives_total": { "name": "Spaces total" },
+      "storage_used": { "name": "Storage used" },
+      "storage_total": { "name": "Storage total" },
+      "storage_free": { "name": "Storage free" },
+      "storage_usage_percent": { "name": "Storage usage" },
+      "drive_used": { "name": "Used" },
+      "drive_total": { "name": "Total" },
+      "drive_usage_percent": { "name": "Usage" },
+      "drive_free": { "name": "Free" },
+      "drive_quota_state": { "name": "Quota state" }
+    },
+    "binary_sensor": {
+      "server_online": { "name": "Online" }
+    }
+  }
+}

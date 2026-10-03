@@ -1,0 +1,13 @@
+{
+  "domain": "ocis",
+  "name": "ownCloud Infinite Scale",
+  "version": "0.1.0",
+  "codeowners": ["@loren"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/loren/ocis-homeassistant",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/loren/ocis-homeassistant/issues",
+  "requirements": []
+}

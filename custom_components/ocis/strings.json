@@ -1,0 +1,53 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to ownCloud Infinite Scale",
+        "description": "Enter the public URL and an app token created with `ocis auth-app create`.",
+        "data": {
+          "base_url": "Base URL",
+          "username": "Username",
+          "app_token": "App token",
+          "verify_ssl": "Verify SSL certificate"
+        },
+        "data_description": {
+          "base_url": "Public URL via reverse proxy, e.g. https://ocis.example.com",
+          "username": "Admin user the token was created for",
+          "app_token": "Long-lived token from `ocis auth-app create --user-name=admin`",
+          "verify_ssl": "Turn off for self-signed certificates"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate OCIS",
+        "description": "The app token was rejected. Create a new one and paste it here.",
+        "data": {
+          "app_token": "New app token",
+          "verify_ssl": "Verify SSL certificate"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to reach OCIS. Check URL, reverse proxy and SSL flag.",
+      "invalid_auth": "Authentication failed. Check username and app token.",
+      "unknown": "Unexpected error. Check logs."
+    },
+    "abort": {
+      "already_configured": "This OCIS server is already configured.",
+      "wrong_account": "This token belongs to a different server/user."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "OCIS settings",
+        "description": "Lightweight polling: 4 small HTTP calls per cycle.",
+        "data": {
+          "scan_interval": "Update interval (minutes)"
+        },
+        "data_description": {
+          "scan_interval": "How often to poll OCIS (1-60 minutes, default 15)"
+        }
+      }
+    }
+  }
+}

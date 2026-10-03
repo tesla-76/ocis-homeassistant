@@ -1,0 +1,19 @@
+{
+  "entity": {
+    "sensor": {
+      "storage_used": { "default": "mdi:hard-disk" },
+      "storage_total": { "default": "mdi:hard-disk" },
+      "storage_free": { "default": "mdi:hard-disk" },
+      "storage_usage_percent": { "default": "mdi:chart-pie" },
+      "version": { "default": "mdi:tag" },
+      "users_total": { "default": "mdi:account-group" },
+      "drives_total": { "default": "mdi:database" },
+      "drive_used": { "default": "mdi:hard-disk" },
+      "drive_total": { "default": "mdi:hard-disk" },
+      "drive_usage_percent": { "default": "mdi:chart-pie" }
+    },
+    "binary_sensor": {
+      "server_online": { "default": "mdi:server-network" }
+    }
+  }
+}
