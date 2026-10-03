@@ -30,12 +30,12 @@ Server device `OCIS <host>` + one device per Space/drive.
 
 Globals: version, edition, users total/active/disabled, groups total (may be unavailable if forbidden), spaces total, storage used (GB), worst quota state across Spaces, latest Space activity. Binary `online`.
 
-Per-drive (enabled by default): used, total, usage %. Disabled by default: free, quota state. Extra attributes: drive name/type/owner.
+Per-drive (both enabled by default): used (GB) and quota state (`normal`/`nearing`/`critical`/`exceeded`). Extra attributes: drive name/type/owner. Entities of removed sensor types are cleaned up automatically.
 
 ## Known limitations
 
 - Drives listed are those visible to the token user; an admin token sees all.
-- `quota.total = 0` means unlimited in OCIS (with `remaining` = max-int64): per-drive total/usage correctly show `unknown`.
+- `quota.total = 0` means unlimited in OCIS (with `remaining` = max-int64).
 - Global storage used counts real Spaces only; virtual drives (Shares) are excluded.
 - Groups count is best-effort; polling still succeeds if forbidden.
 - Storage totals are sums of returned Spaces, not host disk. For real host-disk

@@ -12,7 +12,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, UnitOfInformation
+from homeassistant.const import UnitOfInformation
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -104,7 +104,7 @@ GLOBAL_DESCRIPTIONS: tuple[OcisSensorDescription, ...] = (
     ),
 )
 
-# User request: used + total + usage_percent enabled; rest opt-in.
+# Per-drive: only Used + Quota state (both enabled by default).
 DRIVE_DESCRIPTIONS: tuple[OcisDriveSensorDescription, ...] = (
     OcisDriveSensorDescription(
         key="used",
@@ -116,36 +116,8 @@ DRIVE_DESCRIPTIONS: tuple[OcisDriveSensorDescription, ...] = (
         value_fn=lambda d: _gb(d.get("used")),
     ),
     OcisDriveSensorDescription(
-        key="total",
-        translation_key="drive_total",
-        device_class=SensorDeviceClass.DATA_SIZE,
-        state_class=SensorStateClass.TOTAL,
-        native_unit_of_measurement=UnitOfInformation.GIGABYTES,
-        suggested_display_precision=2,
-        value_fn=lambda d: _gb(d.get("total")),
-    ),
-    OcisDriveSensorDescription(
-        key="usage_percent",
-        translation_key="drive_usage_percent",
-        state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=PERCENTAGE,
-        suggested_display_precision=1,
-        value_fn=lambda d: d.get("usage_percent"),
-    ),
-    OcisDriveSensorDescription(
-        key="free",
-        translation_key="drive_free",
-        device_class=SensorDeviceClass.DATA_SIZE,
-        state_class=SensorStateClass.TOTAL,
-        native_unit_of_measurement=UnitOfInformation.GIGABYTES,
-        suggested_display_precision=2,
-        entity_registry_enabled_default=False,
-        value_fn=lambda d: _gb(d.get("free")),
-    ),
-    OcisDriveSensorDescription(
         key="quota_state",
         translation_key="drive_quota_state",
-        entity_registry_enabled_default=False,
         value_fn=lambda d: d.get("quota_state"),
     ),
 )
@@ -235,7 +207,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
     def _sync_drives() -> None:
-        """Add entities for new drives, remove those of deleted drives."""
+        """Add entities for new drives; remove deleted drives and retired keys."""
         current = set(_drives_now())
         if new := current - known:
             known.update(new)
@@ -244,34 +216,33 @@ async def async_setup_entry(
                 for did in sorted(new)
                 for desc in DRIVE_DESCRIPTIONS
             )
-        if removed := known - current:
-            from homeassistant.helpers import entity_registry as er
+        # Suffixes of sensor types that no longer exist (e.g. after an
+        # update that drops descriptions): their entities are retired too.
+        valid_suffixes = tuple(f"_{desc.key}" for desc in DRIVE_DESCRIPTIONS)
+        retired_suffixes = ("_total", "_usage_percent", "_free")
+        removed = known - current
+        # Always scan (cheap: a handful of entities every 15 min) so that
+        # entities of dropped sensor types are retired automatically.
+        from homeassistant.helpers import entity_registry as er
 
-            registry = er.async_get(hass)
-            prefix = f"{entry.entry_id}_drive_"
-            for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
-                uid = entity.unique_id
-                if not uid.startswith(prefix):
-                    continue
-                # unique_id = {entry_id}_drive_{drive_id}_{key}; match the
-                # known key suffix explicitly (quota_state contains "_").
-                rest = uid[len(prefix) :]
-                drive_id = next(
-                    (
-                        rest[: -len(suffix)]
-                        for suffix in (
-                            "_used",
-                            "_total",
-                            "_usage_percent",
-                            "_free",
-                            "_quota_state",
-                        )
-                        if rest.endswith(suffix)
-                    ),
-                    None,
-                )
-                if drive_id in removed:
-                    registry.async_remove(entity.entity_id)
-            known.intersection_update(current)
+        registry = er.async_get(hass)
+        prefix = f"{entry.entry_id}_drive_"
+        for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+            uid = entity.unique_id
+            if not uid.startswith(prefix):
+                continue
+            # unique_id = {entry_id}_drive_{drive_id}_{key}; match the
+            # known key suffix explicitly (quota_state contains "_").
+            rest = uid[len(prefix) :]
+            suffix = next(
+                (s for s in valid_suffixes + retired_suffixes if rest.endswith(s)),
+                None,
+            )
+            if suffix is None:
+                continue
+            drive_id = rest[: -len(suffix)]
+            if drive_id in removed or suffix in retired_suffixes:
+                registry.async_remove(entity.entity_id)
+        known.intersection_update(current)
 
     entry.async_on_unload(coordinator.async_add_listener(_sync_drives))

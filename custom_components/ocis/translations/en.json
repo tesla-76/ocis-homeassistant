@@ -63,9 +63,6 @@
       "storage_state": { "name": "Quota state" },
       "storage_last_modified": { "name": "Last change" },
       "drive_used": { "name": "Used" },
-      "drive_total": { "name": "Total" },
-      "drive_usage_percent": { "name": "Usage" },
-      "drive_free": { "name": "Free" },
       "drive_quota_state": { "name": "Quota state" }
     },
     "binary_sensor": {

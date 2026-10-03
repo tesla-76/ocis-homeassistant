@@ -63,9 +63,6 @@
       "storage_state": { "name": "Stato quote" },
       "storage_last_modified": { "name": "Ultima modifica" },
       "drive_used": { "name": "Usato" },
-      "drive_total": { "name": "Totale" },
-      "drive_usage_percent": { "name": "Utilizzo" },
-      "drive_free": { "name": "Libero" },
       "drive_quota_state": { "name": "Stato quota" }
     },
     "binary_sensor": {

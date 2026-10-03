@@ -10,9 +10,7 @@
       "users_disabled": { "default": "mdi:account-multiple-remove" },
       "groups_total": { "default": "mdi:group" },
       "drives_total": { "default": "mdi:database" },
-      "drive_used": { "default": "mdi:hard-disk" },
-      "drive_total": { "default": "mdi:hard-disk" },
-      "drive_usage_percent": { "default": "mdi:chart-pie" }
+      "drive_used": { "default": "mdi:hard-disk" }
     },
     "binary_sensor": {
       "server_online": { "default": "mdi:server-network" }
