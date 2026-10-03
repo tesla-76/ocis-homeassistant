@@ -54,7 +54,6 @@
     "sensor": {
       "version": { "name": "Versione" },
       "edition": { "name": "Edizione" },
-      "users_total": { "name": "Utenti totali" },
       "users_active": { "name": "Utenti attivi" },
       "users_disabled": { "name": "Utenti disabilitati" },
       "groups_total": { "name": "Gruppi totali" },
