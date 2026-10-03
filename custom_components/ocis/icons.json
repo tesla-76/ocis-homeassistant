@@ -6,6 +6,8 @@
       "storage_last_modified": { "default": "mdi:clock-check-outline" },
       "version": { "default": "mdi:tag" },
       "users_total": { "default": "mdi:account-group" },
+      "users_active": { "default": "mdi:account-multiple-check" },
+      "users_disabled": { "default": "mdi:account-multiple-remove" },
       "drives_total": { "default": "mdi:database" },
       "drive_used": { "default": "mdi:hard-disk" },
       "drive_total": { "default": "mdi:hard-disk" },
