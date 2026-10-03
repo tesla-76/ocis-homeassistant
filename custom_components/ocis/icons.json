@@ -1,7 +1,7 @@
 {
   "entity": {
     "sensor": {
-      "storage_used": { "default": "mdi:hard-disk" },
+      "storage_used": { "default": "mdi:storage" },
       "storage_state": { "default": "mdi:chart-pie" },
       "storage_last_modified": { "default": "mdi:clock-check-outline" },
       "version": { "default": "mdi:tag" },
