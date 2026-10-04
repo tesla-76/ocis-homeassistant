@@ -59,12 +59,6 @@ GLOBAL_DESCRIPTIONS: tuple[OcisSensorDescription, ...] = (
         value_fn=lambda d: d.get("users_total"),
     ),
     OcisSensorDescription(
-        key="users_active",
-        translation_key="users_active",
-        state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: d.get("users_active"),
-    ),
-    OcisSensorDescription(
         key="users_disabled",
         translation_key="users_disabled",
         state_class=SensorStateClass.MEASUREMENT,
