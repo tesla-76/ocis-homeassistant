@@ -26,7 +26,9 @@ Alternative considered and rejected: OIDC password grant (fragile behind reverse
 
 ## Entities
 
-Server device `OCIS <host>` + one device per Space/drive.
+Server device `OCIS <host>` (version, users, storage, online) + one device per
+OCIS user (account switch + that user's Space sensors) + `OCIS shared spaces`
+for project/shared Spaces with no single owner.
 
 Globals: version, edition, users total/active/disabled, groups total (may be unavailable if forbidden), spaces total, storage used (GB), worst quota state across Spaces, latest Space activity. Binary `online`. Switches: one per account to enable/disable it — never created for the primary account used in setup (matched by user id, username fallback).
 

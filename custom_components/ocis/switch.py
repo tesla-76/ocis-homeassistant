@@ -14,20 +14,19 @@ from homeassistant.const import CONF_USERNAME
 from . import OcisConfigEntry
 from .const import CONF_USER_ID
 from .coordinator import OcisCoordinator, OcisUser, is_primary_user
-from .entity import OcisEntity
+from .entity import OcisUserEntity
 from .exceptions import OcisError
 
 PARALLEL_UPDATES = 0
 
 
-class OcisUserSwitch(OcisEntity, SwitchEntity):
+class OcisUserSwitch(OcisUserEntity, SwitchEntity):
     """Toggle accountEnabled for one OCIS user via Libre Graph PATCH."""
 
     _attr_device_class = SwitchDeviceClass.SWITCH
 
     def __init__(self, coordinator: OcisCoordinator, user: OcisUser) -> None:
-        super().__init__(coordinator)
-        self._user_id = user["id"]
+        super().__init__(coordinator, user["id"])
         # Dynamic name (one per user) — static translation_key cannot vary.
         self._attr_name = user["display_name"]
         self._attr_unique_id = (
@@ -40,12 +39,6 @@ class OcisUserSwitch(OcisEntity, SwitchEntity):
         if user is None:
             return None
         return user.get("enabled", True)
-
-    @property
-    def available(self) -> bool:
-        return (
-            super().available and self.coordinator.get_user(self._user_id) is not None
-        )
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:

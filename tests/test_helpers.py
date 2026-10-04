@@ -110,3 +110,20 @@ def test_parse_users_and_primary_exclusion() -> None:
     assert is_primary_user(admin, "Admin", None) is True
     assert is_primary_user(admin, "other", None) is False
     assert is_primary_user(admin, None, None) is False
+
+
+def test_drive_owner_id_parsed() -> None:
+    drives = [
+        {
+            "id": "d1",
+            "name": "Admin",
+            "driveType": "personal",
+            "quota": {"total": 10, "used": 1},
+            "owner": {"user": {"id": "u-1", "displayName": "Admin"}},
+        },
+        {"id": "d2", "name": "Orphan", "driveType": "personal", "quota": {}},
+    ]
+    parsed, _ = summarize_drives(drives)
+    assert parsed["d1"]["owner_id"] == "u-1"
+    assert parsed["d1"]["owner"] == "Admin"
+    assert parsed["d2"]["owner_id"] is None

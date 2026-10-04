@@ -37,6 +37,7 @@ class DriveData(TypedDict, total=False):
     usage_percent: float | None
     quota_state: str | None
     owner: str | None
+    owner_id: str | None
 
 
 class OcisData(TypedDict):
@@ -134,9 +135,12 @@ def summarize_drives(
             pct = round(q_used / q_total * 100, 1)
         owner = d.get("owner") or {}
         owner_name: str | None = None
+        owner_id: str | None = None
         if isinstance(owner, dict):
             user = owner.get("user") or {}
             owner_name = user.get("displayName") or user.get("id")
+            if user.get("id"):
+                owner_id = str(user["id"])
         parsed[drive_id] = DriveData(
             id=drive_id,
             name=str(d.get("name") or drive_id),
@@ -147,6 +151,7 @@ def summarize_drives(
             usage_percent=pct,
             quota_state=quota.get("state"),
             owner=owner_name,
+            owner_id=owner_id,
         )
         if drive_type == "virtual":
             continue  # Shares/Jail mounts: no real storage, keep out of totals
