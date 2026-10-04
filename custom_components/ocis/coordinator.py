@@ -44,6 +44,7 @@ class OcisData(TypedDict):
     users_total: int
     users_active: int
     users_disabled: int
+    users: dict[str, OcisUser]
     groups_total: int | None
     drives_total: int
     drives: dict[str, DriveData]
@@ -67,6 +68,43 @@ def summarize_users(users: list[dict[str, Any]]) -> tuple[int, int, int]:
     total = len(users)
     disabled = sum(1 for u in users if u.get("accountEnabled") is False)
     return total, total - disabled, disabled
+
+
+class OcisUser(TypedDict, total=False):
+    id: str
+    username: str | None
+    display_name: str
+    enabled: bool
+    user_type: str | None
+
+
+def parse_users(users: list[dict[str, Any]]) -> dict[str, OcisUser]:
+    """Index users by id for switch entities (skips entries without id)."""
+    parsed: dict[str, OcisUser] = {}
+    for u in users:
+        uid = u.get("id")
+        if not uid:
+            continue
+        uid = str(uid)
+        parsed[uid] = OcisUser(
+            id=uid,
+            username=u.get("onPremisesSamAccountName"),
+            display_name=str(u.get("displayName") or uid),
+            enabled=u.get("accountEnabled", True) is not False,
+            user_type=u.get("userType"),
+        )
+    return parsed
+
+
+def is_primary_user(
+    user: OcisUser, primary_username: str | None, primary_user_id: str | None
+) -> bool:
+    """True for the account used to configure the integration (never switched)."""
+    if primary_user_id and user.get("id") == primary_user_id:
+        return True
+    if primary_username and isinstance(user.get("username"), str):
+        return user["username"].lower() == primary_username.strip().lower()  # type: ignore[index]
+    return False
 
 
 def summarize_drives(
@@ -193,6 +231,7 @@ class OcisCoordinator(DataUpdateCoordinator[OcisData]):
             users_total=users_total,
             users_active=active,
             users_disabled=disabled,
+            users=parse_users(users),
             groups_total=bundle.get("groups_total"),
             drives_total=len(parsed),
             drives=parsed,
@@ -212,3 +251,8 @@ class OcisCoordinator(DataUpdateCoordinator[OcisData]):
         if not self.data:
             return None
         return self.data.get("drives", {}).get(drive_id)
+
+    def get_user(self, user_id: str) -> OcisUser | None:
+        if not self.data:
+            return None
+        return self.data.get("users", {}).get(user_id)

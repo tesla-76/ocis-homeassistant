@@ -69,7 +69,9 @@ class OcisApi:
         self,
         path: str,
         *,
+        method: str = "GET",
         params: dict[str, Any] | None = None,
+        json_body: dict[str, Any] | None = None,
         auth: bool = True,
     ) -> Any:
         session = await self._get_session()
@@ -78,10 +80,12 @@ class OcisApi:
             headers["Authorization"] = self._basic_header()
         url = self.base_url + path
         try:
-            async with session.get(
+            async with session.request(
+                method,
                 url,
                 headers=headers,
                 params=params,
+                json=json_body,
                 ssl=self.verify_ssl,
             ) as resp:
                 if resp.status in (401, 403):
@@ -121,12 +125,35 @@ class OcisApi:
             "/graph/v1.0/users",
             params={
                 "$top": top,
-                "$select": "id,displayName,accountEnabled,userType",
+                "$select": "id,displayName,accountEnabled,userType,onPremisesSamAccountName",
             },
         )
         if isinstance(data, dict) and isinstance(data.get("value"), list):
             return data["value"]
         return []
+
+    async def async_resolve_user_id(self, username: str) -> str | None:
+        """Return the Graph id for a login name, None when not found."""
+        wanted = (username or "").strip().lower()
+        if not wanted:
+            return None
+        for user in await self.async_get_users_page():
+            candidates = (
+                user.get("onPremisesSamAccountName"),
+                user.get("displayName"),
+            )
+            if any(isinstance(c, str) and c.lower() == wanted for c in candidates):
+                uid = user.get("id")
+                return str(uid) if uid else None
+        return None
+
+    async def async_set_user_enabled(self, user_id: str, enabled: bool) -> None:
+        """Enable/disable an account (needs a write-enabled LDAP/IDM)."""
+        await self._request(
+            f"/graph/v1.0/users/{user_id}",
+            method="PATCH",
+            json_body={"accountEnabled": enabled},
+        )
 
     async def async_get_groups_count(self) -> int | None:
         """Best-effort: None when forbidden so polling still succeeds."""

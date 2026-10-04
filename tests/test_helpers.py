@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 
 from custom_components.ocis.api import normalize_base_url
 from custom_components.ocis.coordinator import (
+    is_primary_user,
+    parse_users,
     summarize_drives,
     summarize_global_state,
     summarize_users,
@@ -89,3 +91,22 @@ def test_summarize_global_state_worst_and_latest() -> None:
 
 def test_summarize_global_state_empty() -> None:
     assert summarize_global_state([]) == (None, None)
+
+
+def test_parse_users_and_primary_exclusion() -> None:
+    users = parse_users(MOCK_USERS)
+    assert set(users) == {"1", "2", "3"}
+    assert users["1"]["username"] is None  # mocks carry no login name
+    admin = {
+        "id": "81990925-ede7-4763-ae9e-2e597a9a32d4",
+        "username": "admin",
+        "display_name": "Admin",
+        "enabled": True,
+        "user_type": "Member",
+    }
+    # Match by id (robust against renames)...
+    assert is_primary_user(admin, "someone", admin["id"]) is True
+    # ...fallback to username for entries created before user_id existed.
+    assert is_primary_user(admin, "Admin", None) is True
+    assert is_primary_user(admin, "other", None) is False
+    assert is_primary_user(admin, None, None) is False

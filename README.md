@@ -28,7 +28,7 @@ Alternative considered and rejected: OIDC password grant (fragile behind reverse
 
 Server device `OCIS <host>` + one device per Space/drive.
 
-Globals: version, edition, users total/active/disabled, groups total (may be unavailable if forbidden), spaces total, storage used (GB), worst quota state across Spaces, latest Space activity. Binary `online`.
+Globals: version, edition, users total/active/disabled, groups total (may be unavailable if forbidden), spaces total, storage used (GB), worst quota state across Spaces, latest Space activity. Binary `online`. Switches: one per account to enable/disable it — never created for the primary account used in setup (matched by user id, username fallback).
 
 Per-drive (both enabled by default): used (GB) and quota state (`normal`/`nearing`/`critical`/`exceeded`). Extra attributes: drive name/type/owner. Entities of removed sensor types are cleaned up automatically.
 

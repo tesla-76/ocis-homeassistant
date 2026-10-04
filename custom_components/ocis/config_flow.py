@@ -22,6 +22,7 @@ from .const import (
     CONF_APP_TOKEN,
     CONF_BASE_URL,
     CONF_SCAN_INTERVAL,
+    CONF_USER_ID,
     CONF_VERIFY_SSL,
     DEFAULT_SCAN_INTERVAL_MINUTES,
     DOMAIN,
@@ -51,7 +52,7 @@ class OcisConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             base_url = normalize_base_url(user_input[CONF_BASE_URL])
             try:
-                await self._async_validate(
+                _, user_id = await self._async_validate(
                     base_url,
                     user_input[CONF_USERNAME],
                     user_input[CONF_APP_TOKEN],
@@ -75,6 +76,7 @@ class OcisConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_USERNAME: user_input[CONF_USERNAME],
                     CONF_APP_TOKEN: user_input[CONF_APP_TOKEN],
                     CONF_VERIFY_SSL: user_input.get(CONF_VERIFY_SSL, True),
+                    CONF_USER_ID: user_id,
                 }
                 options = {CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL_MINUTES}
                 return self.async_create_entry(title=title, data=data, options=options)
@@ -96,10 +98,17 @@ class OcisConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def _async_validate(
         self, base_url: str, username: str, app_token: str, verify_ssl: bool
-    ) -> dict[str, Any]:
+    ) -> tuple[dict[str, Any], str | None]:
+        """Validate connectivity + credentials; resolve the user id (best-effort)."""
         api = OcisApi(base_url, username, app_token, verify_ssl=verify_ssl)
         try:
-            return await api.async_validate()
+            status = await api.async_validate()
+            try:
+                user_id = await api.async_resolve_user_id(username)
+            except OcisError:
+                _LOGGER.debug("Could not resolve user id, using username fallback")
+                user_id = None
+            return status, user_id
         finally:
             await api.async_close()
 

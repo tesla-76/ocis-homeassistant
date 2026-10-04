@@ -10,6 +10,7 @@ CONF_BASE_URL: Final = "base_url"
 CONF_APP_TOKEN: Final = "app_token"
 CONF_VERIFY_SSL: Final = "verify_ssl"
 CONF_SCAN_INTERVAL: Final = "scan_interval"
+CONF_USER_ID: Final = "user_id"
 
 DEFAULT_SCAN_INTERVAL_MINUTES: Final = 15
 MIN_SCAN_INTERVAL_MINUTES: Final = 1
