@@ -1,7 +1,7 @@
 {
   "domain": "ocis",
   "name": "ownCloud Infinite Scale",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "codeowners": ["@tesla-76"],
   "config_flow": true,
   "dependencies": [],
