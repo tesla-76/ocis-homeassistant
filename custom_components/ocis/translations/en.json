@@ -61,7 +61,7 @@
       "storage_used": { "name": "Storage used" },
       "storage_state": { "name": "Quota state" },
       "storage_last_modified": { "name": "Last change" },
-      "drive_used": { "name": "Used" },
+      "drive_used": { "name": "Space used" },
       "drive_quota_state": { "name": "Quota state" }
     },
     "binary_sensor": {
