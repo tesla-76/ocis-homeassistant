@@ -30,7 +30,7 @@ Server device `OCIS <host>` (version, users, storage, online) + one device per
 OCIS user (account switch + that user's Space sensors) + `OCIS shared spaces`
 for project/shared Spaces with no single owner.
 
-Globals: version, edition, users total/active/disabled, groups total (may be unavailable if forbidden), spaces total, storage used (GB), worst quota state across Spaces, latest Space activity. Binary `online`. Switches: one per account to enable/disable it — never created for the primary account used in setup (matched by user id, username fallback).
+Globals: version, edition, users total/disabled, groups total (may be unavailable if forbidden), spaces total, storage used (GB), worst quota state across Spaces, latest activity overall. Per user: account switch + own Spaces (used, quota state) + latest own activity. Shared Spaces device with latest shared activity. Binary `online`. Switches are never created for the primary account used in setup (matched by user id, username fallback).
 
 Per-drive (both enabled by default): used (GB) and quota state (`normal`/`nearing`/`critical`/`exceeded`). Extra attributes: drive name/type/owner. Entities of removed sensor types are cleaned up automatically.
 

@@ -3,7 +3,9 @@
     "sensor": {
       "storage_used": { "default": "mdi:database" },
       "storage_state": { "default": "mdi:chart-pie" },
-      "storage_last_modified": { "default": "mdi:clock-check-outline" },
+      "storage_last_modified": { "default": "mdi:clock-edit" },
+      "user_last_activity": { "default": "mdi:clock-edit-outline" },
+      "shared_last_activity": { "default": "mdi:clock-edit-outline" }
       "version": { "default": "mdi:information-slab-box" },
       "edition": { "default": "mdi:information-slab-box-outline" },
       "users_total": { "default": "mdi:account-group" },

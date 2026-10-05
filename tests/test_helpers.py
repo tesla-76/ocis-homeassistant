@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from custom_components.ocis.api import normalize_base_url
 from custom_components.ocis.coordinator import (
     is_primary_user,
+    latest_activity_for,
     parse_users,
     summarize_drives,
     summarize_global_state,
@@ -127,3 +128,20 @@ def test_drive_owner_id_parsed() -> None:
     assert parsed["d1"]["owner_id"] == "u-1"
     assert parsed["d1"]["owner"] == "Admin"
     assert parsed["d2"]["owner_id"] is None
+
+
+def test_latest_activity_for_owner_and_shared() -> None:
+    from datetime import datetime, timezone
+
+    t1 = datetime(2026, 9, 1, 10, tzinfo=timezone.utc)
+    t2 = datetime(2026, 10, 2, 8, 30, tzinfo=timezone.utc)
+    drives = {
+        "a": {"drive_type": "personal", "owner_id": "u-1", "last_modified": t1},
+        "b": {"drive_type": "project", "owner_id": "u-1", "last_modified": t2},
+        "c": {"drive_type": "project", "owner_id": None, "last_modified": t1},
+        "v": {"drive_type": "virtual", "owner_id": None, "last_modified": t2},
+    }
+    assert latest_activity_for(drives, "u-1", {"u-1", "u-2"}) == t2
+    assert latest_activity_for(drives, "u-2", {"u-1", "u-2"}) is None
+    # Shared: unattributed drives only (virtual excluded even if newer).
+    assert latest_activity_for(drives, None, {"u-1", "u-2"}) == t1

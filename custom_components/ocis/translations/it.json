@@ -68,7 +68,9 @@
           "exceeded": "Superata"
         }
       },
-      "storage_last_modified": { "name": "Ultima modifica" },
+      "storage_last_modified": { "name": "Ultima attività" },
+      "user_last_activity": { "name": "Ultima attività" },
+      "shared_last_activity": { "name": "Ultima attività" },
       "drive_used": { "name": "Spazio usato" },
       "drive_quota_state": {
         "name": "Stato quota",

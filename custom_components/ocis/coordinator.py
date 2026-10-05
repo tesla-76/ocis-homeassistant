@@ -38,6 +38,7 @@ class DriveData(TypedDict, total=False):
     quota_state: str | None
     owner: str | None
     owner_id: str | None
+    last_modified: datetime | None
 
 
 class OcisData(TypedDict):
@@ -133,6 +134,7 @@ def summarize_drives(
         pct: float | None = None
         if q_total:
             pct = round(q_used / q_total * 100, 1)
+        last_modified = _parse_ts(d.get("lastModifiedDateTime"))
         owner = d.get("owner") or {}
         owner_name: str | None = None
         owner_id: str | None = None
@@ -152,11 +154,21 @@ def summarize_drives(
             quota_state=quota.get("state"),
             owner=owner_name,
             owner_id=owner_id,
+            last_modified=last_modified,
         )
         if drive_type == "virtual":
             continue  # Shares/Jail mounts: no real storage, keep out of totals
         used += q_used
     return parsed, used
+
+
+def _parse_ts(raw: Any) -> datetime | None:
+    if not isinstance(raw, str):
+        return None
+    try:
+        return datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
 
 
 _STATE_SEVERITY = {"normal": 1, "nearing": 2, "critical": 3, "exceeded": 4}
@@ -177,14 +189,37 @@ def summarize_global_state(
             worst_rank = _STATE_SEVERITY[state]
             worst = state
         raw_ts = d.get("lastModifiedDateTime")
-        if isinstance(raw_ts, str):
-            try:
-                ts = datetime.fromisoformat(raw_ts.replace("Z", "+00:00"))
-            except ValueError:
-                continue
-            if latest is None or ts > latest:
-                latest = ts
+        ts = _parse_ts(raw_ts)
+        if ts is not None and (latest is None or ts > latest):
+            latest = ts
     return worst, latest
+
+
+def latest_activity_for(
+    drives: dict[str, DriveData],
+    owner_id: str | None,
+    known_user_ids: set[str] | None = None,
+) -> datetime | None:
+    """Latest activity of one user's Spaces.
+
+    owner_id=None aggregates Spaces not attributed to any known user
+    (project/shared Spaces), mirroring device grouping.
+    """
+    known = known_user_ids or set()
+    latest: datetime | None = None
+    for d in drives.values():
+        if d.get("drive_type") == "virtual":
+            continue
+        owned = d.get("owner_id")
+        if owner_id is not None:
+            if owned != owner_id:
+                continue
+        elif owned in known:
+            continue
+        ts = d.get("last_modified")
+        if ts is not None and (latest is None or ts > latest):
+            latest = ts
+    return latest
 
 
 class OcisCoordinator(DataUpdateCoordinator[OcisData]):

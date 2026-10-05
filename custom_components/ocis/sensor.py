@@ -14,11 +14,12 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.const import UnitOfInformation
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import OcisConfigEntry
-from .coordinator import OcisCoordinator, OcisData
-from .entity import OcisDriveEntity, OcisEntity
+from .coordinator import OcisCoordinator, OcisData, latest_activity_for
+from .entity import OcisDriveEntity, OcisEntity, OcisUserEntity, shared_device_info
 
 
 def _gb(value_bytes: Any) -> float | None:
@@ -144,6 +145,50 @@ class OcisSensor(OcisEntity, SensorEntity):
         return None
 
 
+class OcisUserActivitySensor(OcisUserEntity, SensorEntity):
+    """Latest file activity across one user's Spaces."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_translation_key = "user_last_activity"
+
+    def __init__(self, coordinator: OcisCoordinator, user_id: str) -> None:
+        super().__init__(coordinator, user_id)
+        self._attr_unique_id = (
+            f"{coordinator.config_entry.entry_id}_user_{user_id}_last_activity"
+        )
+
+    @property
+    def native_value(self) -> Any:
+        data = self.coordinator.data or {}
+        return latest_activity_for(
+            data.get("drives", {}), self._user_id, set(data.get("users", {}))
+        )
+
+
+class OcisSharedActivitySensor(OcisEntity, SensorEntity):
+    """Latest file activity across shared/unowned Spaces."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_translation_key = "shared_last_activity"
+
+    def __init__(self, coordinator: OcisCoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = (
+            f"{coordinator.config_entry.entry_id}_shared_last_activity"
+        )
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        return shared_device_info(self.coordinator)
+
+    @property
+    def native_value(self) -> Any:
+        data = self.coordinator.data or {}
+        return latest_activity_for(
+            data.get("drives", {}), None, set(data.get("users", {}))
+        )
+
+
 class OcisDriveSensor(OcisDriveEntity, SensorEntity):
     entity_description: OcisDriveSensorDescription
 
@@ -187,34 +232,47 @@ async def async_setup_entry(
     entities: list[SensorEntity] = [
         OcisSensor(coordinator, desc) for desc in GLOBAL_DESCRIPTIONS
     ]
-    known: set[str] = set()
+    entities.append(OcisSharedActivitySensor(coordinator))
+    known_drives: set[str] = set()
+    known_users: set[str] = set()
+
+    def _users_now() -> list[str]:
+        return list((coordinator.data or {}).get("users", {}))
 
     def _drives_now() -> list[str]:
         return coordinator.get_drive_ids()
 
     for drive_id in _drives_now():
-        known.add(drive_id)
+        known_drives.add(drive_id)
         entities.extend(
             OcisDriveSensor(coordinator, desc, drive_id) for desc in DRIVE_DESCRIPTIONS
         )
+    for user_id in _users_now():
+        known_users.add(user_id)
+        entities.append(OcisUserActivitySensor(coordinator, user_id))
 
     async_add_entities(entities)
 
     def _sync_drives() -> None:
-        """Add entities for new drives; remove deleted drives and retired keys."""
+        """Add entities for new drives/users; remove deleted drives, retired keys."""
         current = set(_drives_now())
-        if new := current - known:
-            known.update(new)
+        if new := current - known_drives:
+            known_drives.update(new)
             async_add_entities(
                 OcisDriveSensor(coordinator, desc, did)
                 for did in sorted(new)
                 for desc in DRIVE_DESCRIPTIONS
             )
+        if new_users := set(_users_now()) - known_users:
+            known_users.update(new_users)
+            async_add_entities(
+                OcisUserActivitySensor(coordinator, uid) for uid in sorted(new_users)
+            )
         # Suffixes of sensor types that no longer exist (e.g. after an
         # update that drops descriptions): their entities are retired too.
         valid_suffixes = tuple(f"_{desc.key}" for desc in DRIVE_DESCRIPTIONS)
         retired_suffixes = ("_total", "_usage_percent", "_free")
-        removed = known - current
+        removed = known_drives - current
         # Always scan (cheap: a handful of entities every 15 min) so that
         # entities of dropped sensor types are retired automatically.
         from homeassistant.helpers import entity_registry as er
@@ -237,6 +295,6 @@ async def async_setup_entry(
             drive_id = rest[: -len(suffix)]
             if drive_id in removed or suffix in retired_suffixes:
                 registry.async_remove(entity.entity_id)
-        known.intersection_update(current)
+        known_drives.intersection_update(current)
 
     entry.async_on_unload(coordinator.async_add_listener(_sync_drives))
