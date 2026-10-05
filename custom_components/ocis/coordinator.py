@@ -112,7 +112,7 @@ def is_primary_user(
 def summarize_drives(
     drives: list[dict[str, Any]],
 ) -> tuple[dict[str, DriveData], int]:
-    """Per-drive quota map + total used bytes (virtual drives excluded)."""
+    """Per-drive quota map + total used bytes (virtual drives ignored entirely)."""
     parsed: dict[str, DriveData] = {}
     used = 0
     for d in drives:
@@ -120,6 +120,8 @@ def summarize_drives(
         if not drive_id:
             continue
         drive_type = str(d.get("driveType") or "unknown")
+        if drive_type == "virtual":
+            continue  # Shares jail/mounts: no storage of their own, ignore entirely
         quota = d.get("quota") or {}
         q_total = _as_int(quota.get("total"))
         # OCIS uses total=0 for "unlimited/no quota" (remaining=max-int64).
@@ -156,8 +158,6 @@ def summarize_drives(
             owner_id=owner_id,
             last_modified=last_modified,
         )
-        if drive_type == "virtual":
-            continue  # Shares/Jail mounts: no real storage, keep out of totals
         used += q_used
     return parsed, used
 

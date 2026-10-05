@@ -39,7 +39,7 @@ Entities of deleted users, deleted Spaces and removed sensor types are cleaned u
 
 - Drives listed are those visible to the token user; an admin token sees all.
 - `quota.total = 0` means unlimited in OCIS (with `remaining` = max-int64).
-- Global storage used counts real Spaces only; virtual drives (Shares) are excluded. It is a sum of Space quotas, not host disk: for real host-disk free space, monitor the OCIS machine itself (e.g. SNMP on the LXC).
+- Global storage used counts real Spaces only; virtual drives (Shares jail) are ignored entirely. It is a sum of Space quotas, not host disk: for real host-disk free space, monitor the OCIS machine itself (e.g. SNMP on the LXC).
 - Groups count is best-effort; polling still succeeds if forbidden.
 
 ## Translations
@@ -107,7 +107,7 @@ Entità di utenti/Spazi cancellati e di tipi sensore rimossi si puliscono da sol
 
 - Gli Space elencati sono quelli visibili all'utente del token; con token admin si vedono tutti.
 - `quota.total = 0` in OCIS significa illimitato (con `remaining` = max-int64).
-- Lo spazio usato globale conta solo gli Space reali; i drive virtuali (Shares) sono esclusi. È una somma di quote, non il disco host: per lo spazio reale del disco monitora la macchina OCIS (es. SNMP su LXC).
+- Lo spazio usato globale conta solo gli Space reali; i drive virtuali (Shares) sono ignorati del tutto. È una somma di quote, non il disco host: per lo spazio reale del disco monitora la macchina OCIS (es. SNMP su LXC).
 - Il conteggio gruppi è best-effort; il polling continua anche se vietato.
 
 ## Traduzioni

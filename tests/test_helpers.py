@@ -33,7 +33,7 @@ def test_summarize_drives_missing_total() -> None:
     assert used == 350
 
 
-def test_summarize_drives_virtual_excluded_from_used() -> None:
+def test_summarize_drives_virtual_ignored() -> None:
     drives = [
         {
             "id": "a",
@@ -45,7 +45,7 @@ def test_summarize_drives_virtual_excluded_from_used() -> None:
     ]
     parsed, used = summarize_drives(drives)
     assert used == 250
-    assert "c" in parsed  # entities still created, just out of totals
+    assert "c" not in parsed  # virtual Shares jail: no entities at all
 
 
 def test_summarize_drives_zero_total_is_unlimited() -> None:
