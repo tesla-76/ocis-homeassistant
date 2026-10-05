@@ -14,7 +14,7 @@ from custom_components.ocis.exceptions import OcisAuthError, OcisConnectionError
 from .conftest import MOCK_CONFIG, MOCK_STATUS
 
 
-def _patch_validate(side_effect=None):
+def _patch_validate():
     return patch(
         "custom_components.ocis.config_flow.OcisApi",
         autospec=True,
