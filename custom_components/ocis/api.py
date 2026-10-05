@@ -32,7 +32,7 @@ def normalize_base_url(raw: str) -> str:
 
 
 class OcisApi:
-    """Lightweight OCIS API wrapper. Owns its session only when needed."""
+    """Lightweight OCIS API wrapper with a single shared session."""
 
     def __init__(
         self,
