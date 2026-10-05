@@ -9,7 +9,8 @@
       "users_disabled": { "default": "mdi:account-multiple-remove" },
       "groups_total": { "default": "mdi:group" },
       "drives_total": { "default": "mdi:table-account" },
-      "drive_used": { "default": "mdi:database-outline" }
+      "drive_used": { "default": "mdi:database-outline" },
+      "drive_quota_state": { "default": "mdi:chart-pie-outline" }
     },
     "binary_sensor": {
       "server_online": { "default": "mdi:server-network" }
