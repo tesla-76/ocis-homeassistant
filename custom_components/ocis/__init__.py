@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -29,8 +30,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: OcisConfigEntry) -> bool
 
     def _update_interval_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
         minutes = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MINUTES)
-        from datetime import timedelta
-
         coordinator.update_interval = timedelta(minutes=minutes)
 
     entry.async_on_unload(entry.add_update_listener(_update_interval_listener))

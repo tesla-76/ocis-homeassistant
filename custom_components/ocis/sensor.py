@@ -21,6 +21,8 @@ from . import OcisConfigEntry
 from .coordinator import OcisCoordinator, OcisData, latest_activity_for
 from .entity import OcisDriveEntity, OcisEntity, OcisUserEntity, shared_device_info
 
+PARALLEL_UPDATES = 0
+
 
 def _gb(value_bytes: Any) -> float | None:
     """Present bytes as GB (2 decimals) — raw bytes stay in coordinator data."""
