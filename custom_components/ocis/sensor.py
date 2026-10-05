@@ -257,6 +257,8 @@ async def async_setup_entry(
 
     def _sync_drives() -> None:
         """Add entities for new drives/users; remove deleted drives, retired keys."""
+        if not coordinator.data:
+            return  # never wipe entities when we simply have no data yet
         current = set(_drives_now())
         if new := current - known_drives:
             known_drives.update(new)

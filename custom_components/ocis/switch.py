@@ -92,6 +92,8 @@ async def async_setup_entry(
     def _check_new_users() -> None:
         from homeassistant.helpers import entity_registry as er
 
+        if not coordinator.data:
+            return  # never wipe entities when we simply have no data yet
         current = set(_switchable())
         if new := current - known:
             known.update(new)
