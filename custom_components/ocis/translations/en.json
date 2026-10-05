@@ -59,10 +59,26 @@
       "groups_total": { "name": "Groups total" },
       "drives_total": { "name": "Spaces total" },
       "storage_used": { "name": "Storage used" },
-      "storage_state": { "name": "Quota state" },
+      "storage_state": {
+        "name": "Quota state",
+        "state": {
+          "normal": "Normal",
+          "nearing": "Nearing limit",
+          "critical": "Critical",
+          "exceeded": "Exceeded"
+        }
+      },
       "storage_last_modified": { "name": "Last change" },
       "drive_used": { "name": "Space used" },
-      "drive_quota_state": { "name": "Quota state" }
+      "drive_quota_state": {
+        "name": "Quota state",
+        "state": {
+          "normal": "Normal",
+          "nearing": "Nearing limit",
+          "critical": "Critical",
+          "exceeded": "Exceeded"
+        }
+      }
     },
     "binary_sensor": {
       "server_online": { "name": "Online" }

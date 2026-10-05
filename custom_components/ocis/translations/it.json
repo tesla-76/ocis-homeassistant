@@ -59,10 +59,26 @@
       "groups_total": { "name": "Gruppi totali" },
       "drives_total": { "name": "Spazi totali" },
       "storage_used": { "name": "Spazio usato" },
-      "storage_state": { "name": "Stato quote" },
+      "storage_state": {
+        "name": "Stato quote",
+        "state": {
+          "normal": "Normale",
+          "nearing": "Quasi pieno",
+          "critical": "Critico",
+          "exceeded": "Superata"
+        }
+      },
       "storage_last_modified": { "name": "Ultima modifica" },
       "drive_used": { "name": "Spazio usato" },
-      "drive_quota_state": { "name": "Stato quota" }
+      "drive_quota_state": {
+        "name": "Stato quota",
+        "state": {
+          "normal": "Normale",
+          "nearing": "Quasi pieno",
+          "critical": "Critico",
+          "exceeded": "Superata"
+        }
+      }
     },
     "binary_sensor": {
       "server_online": { "name": "In linea" }
