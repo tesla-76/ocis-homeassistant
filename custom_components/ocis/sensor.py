@@ -18,6 +18,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import OcisConfigEntry
+from .const import DRIVES_PAGE_SIZE, USERS_PAGE_SIZE
 from .coordinator import OcisCoordinator, OcisData, latest_activity_for
 from .entity import OcisDriveEntity, OcisEntity, OcisUserEntity, shared_device_info
 
@@ -276,7 +277,8 @@ async def async_setup_entry(
         # update that drops descriptions): their entities are retired too.
         valid_suffixes = tuple(f"_{desc.key}" for desc in DRIVE_DESCRIPTIONS)
         retired_suffixes = ("_total", "_usage_percent", "_free")
-        removed = known_drives - current
+        # Paginated (truncated) responses must never look like deletions.
+        removed = known_drives - current if len(current) < DRIVES_PAGE_SIZE else set()
         # Always scan (cheap: a handful of entities every 15 min) so that
         # entities of dropped sensor types are retired automatically.
         from homeassistant.helpers import entity_registry as er
@@ -284,7 +286,10 @@ async def async_setup_entry(
         registry = er.async_get(hass)
         prefix = f"{entry.entry_id}_drive_"
         uprefix = f"{entry.entry_id}_user_"
-        removed_users = known_users - set(_users_now())
+        users_now = set(_users_now())
+        removed_users = (
+            known_users - users_now if len(users_now) < USERS_PAGE_SIZE else set()
+        )
         for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
             uid = entity.unique_id
             if uid.startswith(uprefix) and uid.endswith("_last_activity"):

@@ -11,7 +11,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import OcisConfigEntry
-from .const import CONF_USER_ID
+from .const import CONF_USER_ID, USERS_PAGE_SIZE
 from .coordinator import OcisCoordinator, OcisUser, is_primary_user
 from .entity import OcisUserEntity
 from .exceptions import OcisError
@@ -102,7 +102,8 @@ async def async_setup_entry(
                 OcisUserSwitch(coordinator, users[uid]) for uid in sorted(new)
             )
         # Retire switches of deleted users (same pattern as sensor platform).
-        if removed := known - current:
+        # A full page may hide users beyond it: never treat that as deletion.
+        if removed := (known - current if len(current) < USERS_PAGE_SIZE else set()):
             registry = er.async_get(hass)
             prefix = f"{entry.entry_id}_user_"
             for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
