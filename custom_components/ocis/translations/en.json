@@ -69,6 +69,7 @@
         }
       },
       "storage_last_modified": { "name": "Last activity" },
+      "scan_interval": { "name": "Update interval" },
       "user_last_activity": { "name": "Last activity" },
       "shared_last_activity": { "name": "Last activity" },
       "drive_used": { "name": "Space used" },

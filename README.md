@@ -31,7 +31,7 @@ Server device `OCIS <host>` (version, users, storage, online) + one device per
 OCIS user (account switch + that user's Space sensors + latest own activity) +
 `OCIS shared spaces` for project/shared Spaces with no single owner.
 
-Globals: version, edition, users total/disabled, groups total (may be unavailable if forbidden), spaces total, storage used (GB), worst quota state across Spaces, latest activity overall. Per user: account switch + own Spaces (used in GB, quota state with translated `normal`/`nearing`/`critical`/`exceeded`) + latest own activity + quota limit in GB per personal Space (0 = unlimited). Binary `online`. Switches are never created for the primary account used in setup (matched by user id, username fallback).
+Globals: version, edition, users total/disabled, groups total (may be unavailable if forbidden), spaces total, storage used (GB), worst quota state across Spaces, latest activity overall, polling interval (diagnostic). Per user: account switch + own Spaces (used in GB, quota state with translated `normal`/`nearing`/`critical`/`exceeded`) + latest own activity + quota limit in GB per personal Space (0 = unlimited). Binary `online`. Switches are never created for the primary account used in setup (matched by user id, username fallback).
 
 Entities of deleted users, deleted Spaces and removed sensor types are cleaned up automatically.
 
@@ -99,7 +99,7 @@ utente OCIS (interruttore account + sensori dei suoi Space + ultima attività
 propria) + `OCIS shared spaces` per gli Space progetto/condivisi senza singolo
 proprietario.
 
-Globali: versione, edizione, utenti totali/disabilitati, gruppi totali (può non essere disponibile), spazi totali, spazio usato (GB), stato quota peggiore, ultima attività generale. Per utente: interruttore account + propri Space (usato in GB, stato quota tradotto `normale`/`quasi pieno`/`critico`/`superata`) + ultima attività propria + limite quota in GB per Space personale (0 = illimitato). Binary `online`. Gli interruttori non vengono mai creati per l'account primario del setup (riconosciuto per id, fallback username).
+Globali: versione, edizione, utenti totali/disabilitati, gruppi totali (può non essere disponibile), spazi totali, spazio usato (GB), stato quota peggiore, ultima attività generale, intervallo di aggiornamento (diagnostica). Per utente: interruttore account + propri Space (usato in GB, stato quota tradotto `normale`/`quasi pieno`/`critico`/`superata`) + ultima attività propria + limite quota in GB per Space personale (0 = illimitato). Binary `online`. Gli interruttori non vengono mai creati per l'account primario del setup (riconosciuto per id, fallback username).
 
 Entità di utenti/Spazi cancellati e di tipi sensore rimossi si puliscono da sole.
 

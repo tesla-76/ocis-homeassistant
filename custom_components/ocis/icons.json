@@ -4,6 +4,7 @@
       "storage_used": { "default": "mdi:database" },
       "storage_state": { "default": "mdi:chart-pie" },
       "storage_last_modified": { "default": "mdi:clock-edit" },
+      "scan_interval": { "default": "mdi:timer" },
       "user_last_activity": { "default": "mdi:clock-edit-outline" },
       "shared_last_activity": { "default": "mdi:clock-edit-outline" },
       "version": { "default": "mdi:information-slab-box" },

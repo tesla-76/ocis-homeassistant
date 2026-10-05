@@ -12,9 +12,10 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import UnitOfInformation
+from homeassistant.const import UnitOfInformation, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import OcisConfigEntry
@@ -99,6 +100,15 @@ GLOBAL_DESCRIPTIONS: tuple[OcisSensorDescription, ...] = (
         translation_key="storage_last_modified",
         device_class=SensorDeviceClass.TIMESTAMP,
         value_fn=lambda d: d.get("storage_last_modified"),
+    ),
+    OcisSensorDescription(
+        key="scan_interval",
+        translation_key="scan_interval",
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda d: d.get("scan_interval_minutes"),
     ),
 )
 

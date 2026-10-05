@@ -53,6 +53,7 @@ class OcisData(TypedDict):
     storage_used: int
     storage_state: str | None
     storage_last_modified: datetime | None
+    scan_interval_minutes: int
     version: str | None
     edition: str | None
 
@@ -286,6 +287,11 @@ class OcisCoordinator(DataUpdateCoordinator[OcisData]):
             storage_used=s_used,
             storage_state=state,
             storage_last_modified=last_modified,
+            scan_interval_minutes=int(
+                self.config_entry.options.get(
+                    CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MINUTES
+                )
+            ),
             version=str(version) if version else None,
             edition=status.get("edition"),
         )
