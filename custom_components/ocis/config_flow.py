@@ -129,12 +129,14 @@ class OcisConfigFlow(ConfigFlow, domain=DOMAIN):
                 ),
             }
             try:
-                await self._async_validate(
+                _, user_id = await self._async_validate(
                     data[CONF_BASE_URL],
                     data.get(CONF_USERNAME, "admin"),
                     data[CONF_APP_TOKEN],
                     data.get(CONF_VERIFY_SSL, True),
                 )
+                # Keep the primary-account id fresh (rename-safe).
+                data[CONF_USER_ID] = user_id
             except OcisAuthError:
                 errors["base"] = "invalid_auth"
             except OcisConnectionError:

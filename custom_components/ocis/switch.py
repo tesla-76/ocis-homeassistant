@@ -91,6 +91,8 @@ async def async_setup_entry(
     )
 
     def _check_new_users() -> None:
+        from homeassistant.helpers import entity_registry as er
+
         current = set(_switchable())
         if new := current - known:
             known.update(new)
@@ -98,5 +100,18 @@ async def async_setup_entry(
             async_add_entities(
                 OcisUserSwitch(coordinator, users[uid]) for uid in sorted(new)
             )
+        # Retire switches of deleted users (same pattern as sensor platform).
+        if removed := known - current:
+            registry = er.async_get(hass)
+            prefix = f"{entry.entry_id}_user_"
+            for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+                uid = entity.unique_id
+                if (
+                    uid.startswith(prefix)
+                    and uid.endswith("_enabled")
+                    and uid[len(prefix) : -len("_enabled")] in removed
+                ):
+                    registry.async_remove(entity.entity_id)
+            known.intersection_update(current)
 
     entry.async_on_unload(coordinator.async_add_listener(_check_new_users))

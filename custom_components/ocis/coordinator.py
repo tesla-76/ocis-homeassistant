@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, TypedDict
 
 from homeassistant.config_entries import ConfigEntry
@@ -163,12 +163,20 @@ def summarize_drives(
 
 
 def _parse_ts(raw: Any) -> datetime | None:
+    """Parse OCIS timestamps, normalizing naive values to UTC.
+
+    Mixed naive/aware datetimes cannot be compared (TypeError), so every
+    result is timezone-aware.
+    """
     if not isinstance(raw, str):
         return None
     try:
-        return datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        ts = datetime.fromisoformat(raw.replace("Z", "+00:00"))
     except ValueError:
         return None
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=timezone.utc)
+    return ts
 
 
 _STATE_SEVERITY = {"normal": 1, "nearing": 2, "critical": 3, "exceeded": 4}

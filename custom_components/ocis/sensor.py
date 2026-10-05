@@ -279,8 +279,14 @@ async def async_setup_entry(
 
         registry = er.async_get(hass)
         prefix = f"{entry.entry_id}_drive_"
+        uprefix = f"{entry.entry_id}_user_"
+        removed_users = known_users - set(_users_now())
         for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
             uid = entity.unique_id
+            if uid.startswith(uprefix) and uid.endswith("_last_activity"):
+                if uid[len(uprefix) : -len("_last_activity")] in removed_users:
+                    registry.async_remove(entity.entity_id)
+                continue
             if not uid.startswith(prefix):
                 continue
             # unique_id = {entry_id}_drive_{drive_id}_{key}; match the
@@ -296,5 +302,6 @@ async def async_setup_entry(
             if drive_id in removed or suffix in retired_suffixes:
                 registry.async_remove(entity.entity_id)
         known_drives.intersection_update(current)
+        known_users.intersection_update(_users_now())
 
     entry.async_on_unload(coordinator.async_add_listener(_sync_drives))

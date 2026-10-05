@@ -94,6 +94,34 @@ def test_summarize_global_state_empty() -> None:
     assert summarize_global_state([]) == (None, None)
 
 
+def test_naive_timestamps_normalized_to_utc() -> None:
+    """Mixed naive/aware timestamps must not crash comparisons."""
+    drives = [
+        {
+            "id": "a",
+            "driveType": "personal",
+            "quota": {},
+            "lastModifiedDateTime": "2026-10-02T08:30:00",
+        },
+        {
+            "id": "b",
+            "driveType": "personal",
+            "quota": {},
+            "lastModifiedDateTime": "2026-10-03T08:30:00Z",
+        },
+        {
+            "id": "c",
+            "driveType": "personal",
+            "quota": {},
+            "lastModifiedDateTime": "not-a-date",
+        },
+    ]
+    state, latest = summarize_global_state(drives)
+    assert state is None
+    assert latest == datetime(2026, 10, 3, 8, 30, tzinfo=timezone.utc)
+    assert latest.tzinfo is not None
+
+
 def test_parse_users_and_primary_exclusion() -> None:
     users = parse_users(MOCK_USERS)
     assert set(users) == {"1", "2", "3"}
