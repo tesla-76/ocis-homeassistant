@@ -275,8 +275,10 @@ async def async_setup_entry(
             )
         # Suffixes of sensor types that no longer exist (e.g. after an
         # update that drops descriptions): their entities are retired too.
+        # "_quota" belongs to the number platform: retired only with its drive.
         valid_suffixes = tuple(f"_{desc.key}" for desc in DRIVE_DESCRIPTIONS)
         retired_suffixes = ("_total", "_usage_percent", "_free")
+        foreign_suffixes = ("_quota",)
         # Paginated (truncated) responses must never look like deletions.
         removed = known_drives - current if len(current) < DRIVES_PAGE_SIZE else set()
         # Always scan (cheap: a handful of entities every 15 min) so that
@@ -302,7 +304,11 @@ async def async_setup_entry(
             # known key suffix explicitly (quota_state contains "_").
             rest = uid[len(prefix) :]
             suffix = next(
-                (s for s in valid_suffixes + retired_suffixes if rest.endswith(s)),
+                (
+                    s
+                    for s in valid_suffixes + retired_suffixes + foreign_suffixes
+                    if rest.endswith(s)
+                ),
                 None,
             )
             if suffix is None:
