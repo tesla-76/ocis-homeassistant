@@ -46,10 +46,16 @@ def user_device_info(
     """Device for one OCIS user (switch + their Spaces)."""
     users = (coordinator.data or {}).get("users", {})
     user: OcisUser | None = users.get(user_id)
-    name = (user or {}).get("display_name") or fallback_name or user_id[:8]
+    display = (user or {}).get("display_name") or fallback_name or user_id[:8]
+    language = getattr(getattr(coordinator, "hass", None), "config", None)
+    prefix = (
+        "Utente"
+        if str(getattr(language, "language", "en")).startswith("it")
+        else "User"
+    )
     return DeviceInfo(
         identifiers={(DOMAIN, f"user_{user_id}")},
-        name=str(name),
+        name=f"{prefix} {display}",
         manufacturer="ownCloud",
         model="OCIS account",
         via_device=next(iter(_server_identifiers(coordinator))),

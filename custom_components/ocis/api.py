@@ -31,6 +31,16 @@ def normalize_base_url(raw: str) -> str:
     return value
 
 
+def gb_to_bytes(gb: float | None) -> int | None:
+    """Convert GB to bytes for quota PATCH (0 = unlimited)."""
+    if gb is None or isinstance(gb, bool):
+        return None
+    try:
+        return max(int(float(gb) * 1024**3), 0)
+    except (TypeError, ValueError):
+        return None
+
+
 class OcisApi:
     """Lightweight OCIS API wrapper with a single shared session."""
 
@@ -153,6 +163,16 @@ class OcisApi:
             f"/graph/v1.0/users/{user_id}",
             method="PATCH",
             json_body={"accountEnabled": enabled},
+        )
+
+    async def async_set_drive_quota(
+        self, drive_id: str, total_bytes: int | None
+    ) -> None:
+        """Set a Space quota in bytes (0 = unlimited, needs write permissions)."""
+        await self._request(
+            f"/graph/v1.0/drives/{drive_id}",
+            method="PATCH",
+            json_body={"quota": {"total": total_bytes if total_bytes else 0}},
         )
 
     async def async_get_groups_count(self) -> int | None:

@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 
-from custom_components.ocis.api import normalize_base_url
+from custom_components.ocis.api import gb_to_bytes, normalize_base_url
 from custom_components.ocis.coordinator import (
     is_primary_user,
     latest_activity_for,
@@ -22,6 +22,12 @@ def test_normalize_base_url() -> None:
 
 def test_summarize_users() -> None:
     assert summarize_users(MOCK_USERS) == (3, 2, 1)
+
+
+def test_gb_to_bytes() -> None:
+    assert gb_to_bytes(1) == 1024**3
+    assert gb_to_bytes(0) == 0  # 0 = unlimited
+    assert gb_to_bytes(None) is None
 
 
 def test_summarize_drives_missing_total() -> None:

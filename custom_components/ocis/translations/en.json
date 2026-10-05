@@ -84,6 +84,9 @@
     },
     "binary_sensor": {
       "server_online": { "name": "Online" }
+    },
+    "number": {
+      "drive_quota": { "name": "Quota" }
     }
   }
 }
