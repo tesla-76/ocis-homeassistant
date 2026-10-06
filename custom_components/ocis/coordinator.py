@@ -163,7 +163,6 @@ def summarize_drives(
         quota_raw = d.get("quota")
         quota_state = quota_raw.get("state") if isinstance(quota_raw, dict) else None
         owner_name, owner_id = _parse_owner(d.get("owner"))
-        owner_name, owner_id = _parse_owner(d.get("owner"))
         parsed[drive_id] = DriveData(
             id=drive_id,
             name=str(d.get("name") or drive_id),
@@ -211,7 +210,8 @@ def summarize_global_state(
     for d in drives:
         if str(d.get("driveType") or "unknown") == "virtual":
             continue
-        state = (d.get("quota") or {}).get("state")
+        quota_raw = d.get("quota")
+        state = quota_raw.get("state") if isinstance(quota_raw, dict) else None
         if isinstance(state, str) and _STATE_SEVERITY.get(state, 0) > worst_rank:
             worst_rank = _STATE_SEVERITY[state]
             worst = state
