@@ -266,11 +266,7 @@ async def async_setup_entry(
 
     async_add_entities(entities)
 
-    def _sync_drives() -> None:
-        """Add entities for new drives/users; remove deleted drives, retired keys."""
-        if not coordinator.data:
-            return  # never wipe entities when we simply have no data yet
-        current = set(_drives_now())
+    def _add_new_drives(current: set[str]) -> None:
         if new := current - known_drives:
             known_drives.update(new)
             async_add_entities(
@@ -283,6 +279,8 @@ async def async_setup_entry(
             async_add_entities(
                 OcisUserActivitySensor(coordinator, uid) for uid in sorted(new_users)
             )
+
+    def _retire_stale_entities(current: set[str]) -> None:
         # Suffixes of sensor types that no longer exist (e.g. after an
         # update that drops descriptions): their entities are retired too.
         # "_quota" belongs to the number platform: retired only with its drive.
@@ -327,6 +325,14 @@ async def async_setup_entry(
             if drive_id in removed or suffix in retired_suffixes:
                 registry.async_remove(entity.entity_id)
         known_drives.intersection_update(current)
-        known_users.intersection_update(_users_now())
+        known_users.intersection_update(users_now)
+
+    def _sync_drives() -> None:
+        """Add entities for new drives/users; remove deleted drives, retired keys."""
+        if not coordinator.data:
+            return  # never wipe entities when we simply have no data yet
+        current = set(_drives_now())
+        _add_new_drives(current)
+        _retire_stale_entities(current)
 
     entry.async_on_unload(coordinator.async_add_listener(_sync_drives))

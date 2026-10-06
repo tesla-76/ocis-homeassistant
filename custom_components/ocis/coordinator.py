@@ -110,6 +110,42 @@ def is_primary_user(
     return False
 
 
+def _parse_quota(
+    quota: Any,
+) -> tuple[int | None, int, int | None, float | None]:
+    """Split quota dict into (total, used, free, usage_percent).
+
+    OCIS uses total=0 for "unlimited/no quota" (remaining=max-int64),
+    treated as unknown so usage % stays sane.
+    """
+    if not isinstance(quota, dict):
+        return None, 0, None, None
+    q_total = _as_int(quota.get("total"))
+    if not q_total:
+        q_total = None
+    q_used = _as_int(quota.get("used")) or 0
+    q_remaining = _as_int(quota.get("remaining"))
+    free = q_remaining
+    if free is None and q_total is not None:
+        free = max(q_total - q_used, 0)
+    pct: float | None = None
+    if q_total:
+        pct = round(q_used / q_total * 100, 1)
+    return q_total, q_used, free, pct
+
+
+def _parse_owner(owner: Any) -> tuple[str | None, str | None]:
+    """Split owner dict into (display_name, user_id)."""
+    if not isinstance(owner, dict):
+        return None, None
+    user = owner.get("user") or {}
+    if not isinstance(user, dict):
+        return None, None
+    name = user.get("displayName") or user.get("id")
+    uid = str(user["id"]) if user.get("id") else None
+    return name, uid
+
+
 def summarize_drives(
     drives: list[dict[str, Any]],
 ) -> tuple[dict[str, DriveData], int]:
@@ -123,29 +159,11 @@ def summarize_drives(
         drive_type = str(d.get("driveType") or "unknown")
         if drive_type == "virtual":
             continue  # Shares jail/mounts: no storage of their own, ignore entirely
-        quota = d.get("quota") or {}
-        q_total = _as_int(quota.get("total"))
-        # OCIS uses total=0 for "unlimited/no quota" (remaining=max-int64).
-        # Treat as unknown so usage % and storage totals stay sane.
-        if not q_total:
-            q_total = None
-        q_used = _as_int(quota.get("used")) or 0
-        q_remaining = _as_int(quota.get("remaining"))
-        free = q_remaining
-        if free is None and q_total is not None:
-            free = max(q_total - q_used, 0)
-        pct: float | None = None
-        if q_total:
-            pct = round(q_used / q_total * 100, 1)
-        last_modified = _parse_ts(d.get("lastModifiedDateTime"))
-        owner = d.get("owner") or {}
-        owner_name: str | None = None
-        owner_id: str | None = None
-        if isinstance(owner, dict):
-            user = owner.get("user") or {}
-            owner_name = user.get("displayName") or user.get("id")
-            if user.get("id"):
-                owner_id = str(user["id"])
+        q_total, q_used, free, pct = _parse_quota(d.get("quota"))
+        quota_raw = d.get("quota")
+        quota_state = quota_raw.get("state") if isinstance(quota_raw, dict) else None
+        owner_name, owner_id = _parse_owner(d.get("owner"))
+        owner_name, owner_id = _parse_owner(d.get("owner"))
         parsed[drive_id] = DriveData(
             id=drive_id,
             name=str(d.get("name") or drive_id),
@@ -154,10 +172,10 @@ def summarize_drives(
             used=q_used,
             free=free,
             usage_percent=pct,
-            quota_state=quota.get("state"),
+            quota_state=quota_state,
             owner=owner_name,
             owner_id=owner_id,
-            last_modified=last_modified,
+            last_modified=_parse_ts(d.get("lastModifiedDateTime")),
         )
         used += q_used
     return parsed, used
