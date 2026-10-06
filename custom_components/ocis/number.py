@@ -86,7 +86,7 @@ async def async_setup_entry(
 
     for drive_id in _personal_drives():
         known.add(drive_id)
-    async_add_entities(OcisDriveQuotaNumber(coordinator, did) for did in known)
+    async_add_entities(OcisDriveQuotaNumber(coordinator, did) for did in sorted(known))
 
     def _check_new_drives() -> None:
         if new := set(_personal_drives()) - known:

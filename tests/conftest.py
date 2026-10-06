@@ -72,7 +72,8 @@ def mock_api() -> Generator[AsyncMock]:
         patch("custom_components.ocis.coordinator.OcisApi", autospec=True) as cls2,
     ):
         inst = cls.return_value
-        inst.async_validate = AsyncMock(return_value=MOCK_STATUS)
+        inst.async_validate = AsyncMock(return_value=(MOCK_STATUS, "admin-id"))
+        inst.async_resolve_user_id = AsyncMock(return_value="admin-id")
         inst.async_close = AsyncMock(return_value=None)
         inst2 = cls2.return_value
         inst2.async_get_status = AsyncMock(return_value=MOCK_STATUS)

@@ -28,6 +28,7 @@ async def test_user_flow_success(
     with _patch_validate() as cls:
         inst = cls.return_value
         inst.async_validate = AsyncMock(return_value=MOCK_STATUS)
+        inst.async_resolve_user_id = AsyncMock(return_value="user-1")
         inst.async_close = AsyncMock(return_value=None)
 
         result = await hass.config_entries.flow.async_init(
@@ -41,6 +42,7 @@ async def test_user_flow_success(
         )
         assert result["type"] is FlowResultType.CREATE_ENTRY
         assert result["data"]["base_url"] == "https://ocis.example.com"
+        assert result["data"]["user_id"] == "user-1"
         assert result["options"]["scan_interval"] == 15
 
 
